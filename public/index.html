@@ -3,232 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Drive - C++ OOP Car Rental System</title>
-    <meta name="description" content="College Demo Project: High-Performance C++ Object-Oriented Car Rental Management System powered by Crow C++ Web Framework.">
+    <title>Apex Drive | Premier Car Rental Service</title>
+    <meta name="description" content="Experience high-performance car rentals with transparent rates, seamless reservations, and executive fleet management powered by native C++ backend.">
+    
+    <!-- Google Fonts: Plus Jakarta Sans for luxury editorial feel, JetBrains Mono for rates/IDs -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Top Navigation Header -->
-    <header class="navbar">
+
+    <!-- Professional Navbar -->
+    <header class="navbar" id="top">
         <div class="nav-container">
-            <div class="brand">
-                <div class="brand-icon">🏎️</div>
-                <div>
-                    <h1 class="brand-title">APEX DRIVE</h1>
-                    <p class="brand-subtitle">C++ OOP Car Rental Management System</p>
+            <a href="#top" class="brand" aria-label="Apex Drive Home">
+                <div class="brand-symbol">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                        <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                        <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+                    </svg>
                 </div>
-            </div>
-            <div class="backend-badge">
-                <span class="status-dot"></span>
-                <span id="backend-status">C++ Crow Engine (Port 18080)</span>
+                <div class="brand-text">
+                    <span class="brand-name">APEX DRIVE</span>
+                    <span class="brand-tag">LUXURY FLEET MANAGEMENT</span>
+                </div>
+            </a>
+
+            <nav class="nav-links">
+                <a href="#fleet" class="nav-link">Our Fleet</a>
+                <a href="#rentals" class="nav-link">Active Rentals</a>
+                <a href="#history" class="nav-link">Ledger</a>
+                <a href="#add-car" class="nav-link">Add Vehicle</a>
+            </nav>
+
+            <div class="nav-status-badge" title="Connected to native C++ Crow server">
+                <span class="pulse-indicator"></span>
+                <span class="status-label">C++ Engine Active</span>
             </div>
         </div>
     </header>
 
-    <main class="main-content">
-        <!-- Quick Stats Overview -->
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Fleet</div>
-                <div class="stat-value" id="stat-total">0</div>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-badge">
+                <span class="badge-icon">✦</span>
+                <span>PREMIER AUTOMOTIVE RENTALS</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Available Cars</div>
-                <div class="stat-value text-cyan" id="stat-available">0</div>
+            <h1 class="hero-headline">Drive the Extraordinary.</h1>
+            <p class="hero-subtitle">
+                Engineered for those who demand precision. Rent from our meticulously maintained fleet of executive sedans and all-terrain SUVs with transparent daily rates and instant digital reservation.
+            </p>
+            <div class="hero-actions">
+                <a href="#fleet" class="btn btn-primary btn-lg">
+                    <span>Explore Available Fleet</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
+                </a>
+                <a href="#rentals" class="btn btn-secondary btn-lg">
+                    <span>View Active Rentals</span>
+                </a>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Active Rentals</div>
-                <div class="stat-value text-orange" id="stat-rented">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Revenue</div>
-                <div class="stat-value" id="stat-revenue">₹0</div>
-            </div>
-        </section>
 
-        <!-- Fleet Inventory Section -->
-        <section class="section-card">
-            <div class="section-header">
+            <!-- Key Trust & Feature Metrics -->
+            <div class="hero-metrics">
+                <div class="metric-item">
+                    <span class="metric-val" id="stat-total">0</span>
+                    <span class="metric-label">Total Fleet Vehicles</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-item">
+                    <span class="metric-val text-cyan" id="stat-available">0</span>
+                    <span class="metric-label">Ready for Booking</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-item">
+                    <span class="metric-val text-orange" id="stat-rented">0</span>
+                    <span class="metric-label">Currently on Road</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-item">
+                    <span class="metric-val text-white" id="stat-revenue">₹0</span>
+                    <span class="metric-label">Total Rental Revenue</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="page-container">
+
+        <!-- Fleet Section -->
+        <section class="content-section" id="fleet">
+            <div class="section-top-bar">
                 <div>
-                    <h2 class="section-title">Fleet Inventory</h2>
-                    <p class="section-desc">Real-time vehicle availability persisted to <code>data/cars.txt</code></p>
+                    <span class="section-eyebrow">CURATED SELECTION</span>
+                    <h2 class="section-heading">Available Vehicles</h2>
+                    <p class="section-subtext">Choose a vehicle model to inspect specifications and book immediately.</p>
                 </div>
-                <div class="filter-group">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="Sedan">Sedans</button>
-                    <button class="filter-btn" data-filter="SUV">SUVs</button>
-                    <button class="filter-btn" data-filter="available">Available Only</button>
+
+                <!-- Filter & Search Controls -->
+                <div class="controls-wrapper">
+                    <div class="search-box">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="fleet-search" placeholder="Search model or ID..." aria-label="Search vehicles">
+                    </div>
+
+                    <div class="filter-pills" role="tablist" aria-label="Vehicle Filters">
+                        <button class="filter-pill active" data-filter="all">All Vehicles</button>
+                        <button class="filter-pill" data-filter="Sedan">Sedans</button>
+                        <button class="filter-pill" data-filter="SUV">SUVs</button>
+                        <button class="filter-pill" data-filter="available">Available Only</button>
+                    </div>
                 </div>
             </div>
 
+            <!-- Fleet Cards Grid -->
             <div class="fleet-grid" id="fleet-container">
-                <div class="loading-spinner">Loading vehicle inventory from C++ backend...</div>
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading fleet inventory from C++ engine...</p>
+                </div>
             </div>
         </section>
 
         <!-- Active Rentals & Return Desk -->
-        <section class="section-card">
-            <div class="section-header">
+        <section class="content-section" id="rentals">
+            <div class="section-top-bar">
                 <div>
-                    <h2 class="section-title">Active Rentals &amp; Return Desk</h2>
-                    <p class="section-desc">Manage active customer bookings. Return a vehicle to restore inventory availability.</p>
+                    <span class="section-eyebrow">FLEET OPERATIONS</span>
+                    <h2 class="section-heading">Active Rentals &amp; Return Desk</h2>
+                    <p class="section-subtext">Manage active customer bookings. Return a vehicle to immediately restore fleet availability.</p>
                 </div>
-                <button class="btn btn-outline" id="refresh-rentals-btn">↻ Refresh</button>
+                <button class="btn btn-outline" id="refresh-rentals-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    <span>Refresh</span>
+                </button>
             </div>
 
-            <div class="table-responsive">
-                <table class="data-table">
+            <div class="table-container">
+                <table class="premium-table">
                     <thead>
                         <tr>
-                            <th>Rental ID</th>
-                            <th>Customer</th>
-                            <th>Car</th>
-                            <th>Days</th>
-                            <th>Total Rent</th>
+                            <th>Rental #</th>
+                            <th>Customer Name</th>
+                            <th>Assigned Vehicle</th>
+                            <th>Duration</th>
+                            <th>Total Billed</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="rentals-tbody">
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No rental records found.</td>
+                            <td colspan="7" class="table-empty-state">Loading active rentals...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- Add Vehicle to Inventory Form -->
-        <section class="section-card">
-            <div class="section-header">
+        <!-- Add Vehicle to Fleet Form -->
+        <section class="content-section" id="add-car">
+            <div class="section-top-bar">
                 <div>
-                    <h2 class="section-title">Add Vehicle to Fleet</h2>
-                    <p class="section-desc">Instantiates a new <code>Sedan</code> or <code>SUV</code> object dynamically in the C++ backend.</p>
+                    <span class="section-eyebrow">INVENTORY EXPANSION</span>
+                    <h2 class="section-heading">Add Vehicle to Fleet</h2>
+                    <p class="section-subtext">Registers a new <code>Sedan</code> or <code>SUV</code> instance into the persistent C++ database.</p>
                 </div>
             </div>
 
-            <form id="add-car-form" class="form-grid">
-                <div class="form-group">
-                    <label for="car-id">Car ID</label>
-                    <input type="number" id="car-id" placeholder="e.g. 106" required min="1">
-                </div>
-                <div class="form-group">
-                    <label for="car-name">Car Name</label>
-                    <input type="text" id="car-name" placeholder="e.g. Innova" required>
-                </div>
-                <div class="form-group">
-                    <label for="car-type">Vehicle Type</label>
-                    <select id="car-type" required>
-                        <option value="Sedan">Sedan (Standard Base Rate)</option>
-                        <option value="SUV">SUV (+₹300 Polymorphic Surcharge)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="car-rate">Daily Rate (₹)</label>
-                    <input type="number" id="car-rate" placeholder="e.g. 2800" required min="1" step="0.01">
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Add Vehicle to C++ Fleet</button>
-                </div>
-            </form>
+            <div class="form-card">
+                <form id="add-car-form" class="responsive-form-grid">
+                    <div class="input-field">
+                        <label for="car-id">Vehicle ID</label>
+                        <input type="number" id="car-id" placeholder="e.g. 106" required min="1">
+                        <span class="field-hint">Unique numeric identifier</span>
+                    </div>
+
+                    <div class="input-field">
+                        <label for="car-name">Model Name</label>
+                        <input type="text" id="car-name" placeholder="e.g. AudiA4" required>
+                        <span class="field-hint">Car brand and model</span>
+                    </div>
+
+                    <div class="input-field">
+                        <label for="car-type">Category &amp; Surcharge Tier</label>
+                        <select id="car-type" required>
+                            <option value="Sedan">Executive Sedan (Standard Daily Rate)</option>
+                            <option value="SUV">Luxury SUV (+₹300 Tier Surcharge)</option>
+                        </select>
+                        <span class="field-hint">SUV adds ₹300 calculated in C++</span>
+                    </div>
+
+                    <div class="input-field">
+                        <label for="car-rate">Daily Rate (₹)</label>
+                        <input type="number" id="car-rate" placeholder="e.g. 3500" required min="1" step="0.01">
+                        <span class="field-hint">Standard 24h rental price</span>
+                    </div>
+
+                    <div class="form-submit-cell">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <span>Register Vehicle into Fleet</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </section>
 
-        <!-- Rental History Log -->
-        <section class="section-card">
-            <div class="section-header">
+        <!-- Transaction History Log -->
+        <section class="content-section" id="history">
+            <div class="section-top-bar">
                 <div>
-                    <h2 class="section-title">Rental Transaction Log</h2>
-                    <p class="section-desc">Historical transactions persisted to <code>data/rentals.txt</code></p>
+                    <span class="section-eyebrow">AUDIT &amp; ARCHIVE</span>
+                    <h2 class="section-heading">Rental Transaction Ledger</h2>
+                    <p class="section-subtext">Complete chronological record of all vehicle transactions persisted in <code>data/rentals.txt</code>.</p>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="data-table">
+
+            <div class="table-container">
+                <table class="premium-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Car</th>
+                            <th>Receipt ID</th>
+                            <th>Vehicle Model</th>
                             <th>Customer</th>
-                            <th>Duration</th>
+                            <th>Rental Period</th>
                             <th>Amount</th>
-                            <th>Final Status</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="history-tbody">
                         <tr>
-                            <td colspan="6" class="text-center text-muted">No history found.</td>
+                            <td colspan="6" class="table-empty-state">No transaction records found.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </section>
+
     </main>
 
-    <!-- Booking Modal -->
-    <div class="modal-backdrop" id="booking-modal">
-        <div class="modal-card">
+    <!-- Luxury Booking Modal -->
+    <div class="modal-overlay" id="booking-modal" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="modal-dialog">
             <div class="modal-header">
-                <h3 class="modal-title">Book Vehicle</h3>
-                <button class="modal-close" id="modal-close-btn">&times;</button>
+                <div>
+                    <span class="modal-eyebrow">RESERVATION DESK</span>
+                    <h3 class="modal-title">Book Vehicle</h3>
+                </div>
+                <button class="modal-close-btn" id="modal-close-btn" aria-label="Close modal">&times;</button>
             </div>
+
             <form id="book-form">
                 <input type="hidden" id="book-car-id">
-                
-                <div class="selected-car-card">
-                    <div class="car-summary-header">
-                        <span class="badge" id="modal-car-badge">SUV</span>
-                        <h4 id="modal-car-name">Creta</h4>
+
+                <!-- Selected Vehicle Preview Card -->
+                <div class="modal-vehicle-card">
+                    <div class="vehicle-info">
+                        <span class="vehicle-badge" id="modal-car-badge">SUV</span>
+                        <h4 class="vehicle-name" id="modal-car-name">Creta</h4>
                     </div>
-                    <div class="car-rate-info">
-                        Base Rate: <strong id="modal-car-rate">₹2500</strong> / day
+                    <div class="vehicle-rate-block">
+                        <span class="rate-prefix">Daily Rate</span>
+                        <span class="rate-val font-mono" id="modal-car-rate">₹2,500</span>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="book-customer">Customer Full Name</label>
-                    <input type="text" id="book-customer" placeholder="Enter customer name" required>
-                </div>
+                <div class="modal-form-body">
+                    <div class="input-field">
+                        <label for="book-customer">Customer Full Name</label>
+                        <input type="text" id="book-customer" placeholder="e.g. Rohan Sharma" required autocomplete="name">
+                    </div>
 
-                <div class="form-group">
-                    <label for="book-days">Rental Days</label>
-                    <input type="number" id="book-days" value="1" min="1" max="90" required>
-                </div>
+                    <div class="input-field">
+                        <label for="book-days">Duration (Days)</label>
+                        <input type="number" id="book-days" value="1" min="1" max="60" required>
+                    </div>
 
-                <!-- Dynamic Live Rent Calculation Breakdown -->
-                <div class="bill-preview">
-                    <div class="bill-row">
-                        <span>Base Rental (<span id="calc-days">1</span> days &times; <span id="calc-rate">₹0</span>):</span>
-                        <span id="calc-base">₹0</span>
+                    <!-- Live Dynamic Cost Breakdown -->
+                    <div class="fare-breakdown-card">
+                        <div class="fare-header">Live Rate Breakdown</div>
+                        
+                        <div class="fare-row">
+                            <span class="fare-label">Base Rate (<span id="calc-days">1</span> days &times; <span id="calc-rate">₹0</span>)</span>
+                            <span class="fare-val font-mono" id="calc-base">₹0.00</span>
+                        </div>
+
+                        <div class="fare-row text-orange" id="suv-surcharge-row">
+                            <span class="fare-label">
+                                SUV Surcharge (Polymorphic)
+                                <span class="info-pill">Tier Add-on</span>
+                            </span>
+                            <span class="fare-val font-mono">+₹300.00</span>
+                        </div>
+
+                        <div class="fare-separator"></div>
+
+                        <div class="fare-row fare-total">
+                            <span class="fare-label">Estimated Total Amount</span>
+                            <span class="fare-val total-amount font-mono text-cyan" id="calc-total">₹0.00</span>
+                        </div>
+
+                        <p class="fare-legal-note">
+                            * Calculation executed by C++ runtime polymorphism: <code>calculateRent(days)</code>. No hidden fees or taxes.
+                        </p>
                     </div>
-                    <div class="bill-row text-orange" id="suv-surcharge-row">
-                        <span>SUV Surcharge (Polymorphic):</span>
-                        <span>+₹300.00</span>
-                    </div>
-                    <div class="bill-divider"></div>
-                    <div class="bill-row total-row">
-                        <span>Total Rent (C++ virtual method):</span>
-                        <span class="text-cyan font-mono" id="calc-total">₹0.00</span>
-                    </div>
-                    <small class="text-muted" id="calc-formula-note">
-                        * SUV surcharge calculated using C++ runtime polymorphism: <code>SUV::calculateRent()</code>
-                    </small>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="confirm-booking-btn">Confirm Booking</button>
+                    <button type="button" class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="confirm-booking-btn">
+                        <span>Confirm Reservation</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Toast Notification Container -->
-    <div class="toast-container" id="toast-container"></div>
+    <div class="toast-stack" id="toast-container" aria-live="polite"></div>
 
-    <footer class="footer">
-        <p>College Demo Project • Powered by <strong>C++17</strong> &amp; <strong>Crow Framework</strong> • Backend PID: Active</p>
+    <!-- Luxury Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <span class="brand-name">APEX DRIVE</span>
+                    <p class="footer-tagline">Premier vehicle rental management architecture powered by modern C++17.</p>
+                </div>
+                <div class="footer-badges">
+                    <span class="tech-pill">C++17 Engine</span>
+                    <span class="tech-pill">Crow Microframework</span>
+                    <span class="tech-pill">Single-Origin Deployment</span>
+                    <span class="tech-pill">Flat File Persistence</span>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Apex Drive Rentals. Production-grade native C++ web architecture.</p>
+            </div>
+        </div>
     </footer>
 
     <script src="app.js"></script>
