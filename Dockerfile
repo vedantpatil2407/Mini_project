@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY include/ ./include/
 COPY src/ ./src/
 
-# Compile C++ backend with POSIX threads and static libstdc++ linkage
+# Compile C++ backend with POSIX threads, headers, and static libstdc++ linkage
 # -static-libstdc++ and -static-libgcc prevent GLIBCXX version mismatch errors
-RUN g++ -std=c++17 -O2 -pthread -static-libstdc++ -static-libgcc -I./include src/RentalSystem.cpp src/main.cpp -o server
+RUN g++ -std=c++17 -O2 -pthread -static-libstdc++ -static-libgcc -I./include -I./src src/RentalSystem.cpp src/main.cpp -o server
 
 # Stage 2: Minimal runtime image using the EXACT SAME Debian Bookworm base
 FROM debian:bookworm-slim
@@ -37,9 +37,10 @@ COPY data/ /app/data/
 # Ensure data directory exists and has full write permissions
 RUN mkdir -p /app/data && chmod -R 777 /app/data
 
-# Default port (Render automatically overrides this with $PORT at runtime)
+# Configurable environment variables (Render automatically overrides PORT at runtime)
 ENV PORT=18080
 ENV DATA_DIR=/app/data
+ENV PUBLIC_DIR=/app/public
 
 EXPOSE 18080
 

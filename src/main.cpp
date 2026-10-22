@@ -40,6 +40,9 @@ int main(int argc, char* argv[]) {
     std::string dataPath = (dataEnv != nullptr && std::strlen(dataEnv) > 0) ? dataEnv : "data";
     RentalSystem system(dataPath);
 
+    const char* publicEnv = std::getenv("PUBLIC_DIR");
+    std::string publicDir = (publicEnv != nullptr && std::strlen(publicEnv) > 0) ? publicEnv : "public";
+
     // Optional legacy CLI menu mode
     if (argc > 1 && (std::string(argv[1]) == "--cli" || std::string(argv[1]) == "-c")) {
         std::cout << "Starting Car Rental System in CLI mode..." << std::endl;
@@ -51,27 +54,27 @@ int main(int argc, char* argv[]) {
 
     // ----------------- Static Web Routes -----------------
     CROW_ROUTE(app, "/")
-    ([](const crow::request& req, crow::response& res) {
+    ([publicDir](const crow::request& req, crow::response& res) {
         applyCorsHeaders(req, res);
-        serveStaticFile(res, "public/index.html", "text/html; charset=utf-8");
+        serveStaticFile(res, publicDir + "/index.html", "text/html; charset=utf-8");
     });
 
     CROW_ROUTE(app, "/index.html")
-    ([](const crow::request& req, crow::response& res) {
+    ([publicDir](const crow::request& req, crow::response& res) {
         applyCorsHeaders(req, res);
-        serveStaticFile(res, "public/index.html", "text/html; charset=utf-8");
+        serveStaticFile(res, publicDir + "/index.html", "text/html; charset=utf-8");
     });
 
     CROW_ROUTE(app, "/style.css")
-    ([](const crow::request& req, crow::response& res) {
+    ([publicDir](const crow::request& req, crow::response& res) {
         applyCorsHeaders(req, res);
-        serveStaticFile(res, "public/style.css", "text/css; charset=utf-8");
+        serveStaticFile(res, publicDir + "/style.css", "text/css; charset=utf-8");
     });
 
     CROW_ROUTE(app, "/app.js")
-    ([](const crow::request& req, crow::response& res) {
+    ([publicDir](const crow::request& req, crow::response& res) {
         applyCorsHeaders(req, res);
-        serveStaticFile(res, "public/app.js", "application/javascript; charset=utf-8");
+        serveStaticFile(res, publicDir + "/app.js", "application/javascript; charset=utf-8");
     });
 
     // ----------------- REST API Routes -----------------
@@ -302,6 +305,7 @@ int main(int argc, char* argv[]) {
     std::cout << "  C++ OOP Car Rental Management System - Crow Server\n";
     std::cout << "  Listening on: http://0.0.0.0:" << port << " (Port fallback: 18080)\n";
     std::cout << "  Data directory: " << system.getDataDir() << "\n";
+    std::cout << "  Public directory: " << publicDir << "\n";
     std::cout << "====================================================\n";
 
     app.bindaddr("0.0.0.0").port(port).multithreaded().run();
