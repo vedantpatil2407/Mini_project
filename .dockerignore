@@ -1,0 +1,16 @@
+# Ignore local Windows binaries and artifacts
+server.exe
+*.exe
+*.o
+*.obj
+*.log
+
+# Ignore local backup folders
+backup/
+
+# Ignore local git directory to minimize build context
+.git
+.gitignore
+
+# Ignore Windows batch scripts
+*.bat

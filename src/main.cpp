@@ -36,7 +36,9 @@ void applyCorsHeaders(const crow::request& req, crow::response& res) {
 }
 
 int main(int argc, char* argv[]) {
-    RentalSystem system("data");
+    const char* dataEnv = std::getenv("DATA_DIR");
+    std::string dataPath = (dataEnv != nullptr && std::strlen(dataEnv) > 0) ? dataEnv : "data";
+    RentalSystem system(dataPath);
 
     // Optional legacy CLI menu mode
     if (argc > 1 && (std::string(argv[1]) == "--cli" || std::string(argv[1]) == "-c")) {
@@ -49,6 +51,12 @@ int main(int argc, char* argv[]) {
 
     // ----------------- Static Web Routes -----------------
     CROW_ROUTE(app, "/")
+    ([](const crow::request& req, crow::response& res) {
+        applyCorsHeaders(req, res);
+        serveStaticFile(res, "public/index.html", "text/html; charset=utf-8");
+    });
+
+    CROW_ROUTE(app, "/index.html")
     ([](const crow::request& req, crow::response& res) {
         applyCorsHeaders(req, res);
         serveStaticFile(res, "public/index.html", "text/html; charset=utf-8");
@@ -292,10 +300,10 @@ int main(int argc, char* argv[]) {
 
     std::cout << "====================================================\n";
     std::cout << "  C++ OOP Car Rental Management System - Crow Server\n";
-    std::cout << "  Serving at: http://localhost:" << port << "\n";
+    std::cout << "  Listening on: http://0.0.0.0:" << port << " (Port fallback: 18080)\n";
     std::cout << "  Data directory: " << system.getDataDir() << "\n";
     std::cout << "====================================================\n";
 
-    app.port(port).multithreaded().run();
+    app.bindaddr("0.0.0.0").port(port).multithreaded().run();
     return 0;
 }
