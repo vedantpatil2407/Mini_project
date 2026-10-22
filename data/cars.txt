@@ -1,0 +1,5 @@
+Sedan 101 Swift 1200 1
+Sedan 102 HondaCity 1800 1
+SUV 103 Creta 2500 1
+SUV 104 Fortuner 4500 1
+SUV 105 Scorpio 3000 1

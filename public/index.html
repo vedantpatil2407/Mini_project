@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Drive - C++ OOP Car Rental System</title>
+    <meta name="description" content="College Demo Project: High-Performance C++ Object-Oriented Car Rental Management System powered by Crow C++ Web Framework.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <div class="brand-icon">🏎️</div>
+                <div>
+                    <h1 class="brand-title">APEX DRIVE</h1>
+                    <p class="brand-subtitle">C++ OOP Car Rental Management System</p>
+                </div>
+            </div>
+            <div class="backend-badge">
+                <span class="status-dot"></span>
+                <span id="backend-status">C++ Crow Engine (Port 18080)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Quick Stats Overview -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Fleet</div>
+                <div class="stat-value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Available Cars</div>
+                <div class="stat-value text-cyan" id="stat-available">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Rentals</div>
+                <div class="stat-value text-orange" id="stat-rented">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value" id="stat-revenue">₹0</div>
+            </div>
+        </section>
+
+        <!-- Fleet Inventory Section -->
+        <section class="section-card">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Fleet Inventory</h2>
+                    <p class="section-desc">Real-time vehicle availability persisted to <code>data/cars.txt</code></p>
+                </div>
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="Sedan">Sedans</button>
+                    <button class="filter-btn" data-filter="SUV">SUVs</button>
+                    <button class="filter-btn" data-filter="available">Available Only</button>
+                </div>
+            </div>
+
+            <div class="fleet-grid" id="fleet-container">
+                <div class="loading-spinner">Loading vehicle inventory from C++ backend...</div>
+            </div>
+        </section>
+
+        <!-- Active Rentals & Return Desk -->
+        <section class="section-card">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Active Rentals &amp; Return Desk</h2>
+                    <p class="section-desc">Manage active customer bookings. Return a vehicle to restore inventory availability.</p>
+                </div>
+                <button class="btn btn-outline" id="refresh-rentals-btn">↻ Refresh</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Rental ID</th>
+                            <th>Customer</th>
+                            <th>Car</th>
+                            <th>Days</th>
+                            <th>Total Rent</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rentals-tbody">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No rental records found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Add Vehicle to Inventory Form -->
+        <section class="section-card">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Add Vehicle to Fleet</h2>
+                    <p class="section-desc">Instantiates a new <code>Sedan</code> or <code>SUV</code> object dynamically in the C++ backend.</p>
+                </div>
+            </div>
+
+            <form id="add-car-form" class="form-grid">
+                <div class="form-group">
+                    <label for="car-id">Car ID</label>
+                    <input type="number" id="car-id" placeholder="e.g. 106" required min="1">
+                </div>
+                <div class="form-group">
+                    <label for="car-name">Car Name</label>
+                    <input type="text" id="car-name" placeholder="e.g. Innova" required>
+                </div>
+                <div class="form-group">
+                    <label for="car-type">Vehicle Type</label>
+                    <select id="car-type" required>
+                        <option value="Sedan">Sedan (Standard Base Rate)</option>
+                        <option value="SUV">SUV (+₹300 Polymorphic Surcharge)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="car-rate">Daily Rate (₹)</label>
+                    <input type="number" id="car-rate" placeholder="e.g. 2800" required min="1" step="0.01">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Vehicle to C++ Fleet</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Rental History Log -->
+        <section class="section-card">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Rental Transaction Log</h2>
+                    <p class="section-desc">Historical transactions persisted to <code>data/rentals.txt</code></p>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Car</th>
+                            <th>Customer</th>
+                            <th>Duration</th>
+                            <th>Amount</th>
+                            <th>Final Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-tbody">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No history found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Booking Modal -->
+    <div class="modal-backdrop" id="booking-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Book Vehicle</h3>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+            <form id="book-form">
+                <input type="hidden" id="book-car-id">
+                
+                <div class="selected-car-card">
+                    <div class="car-summary-header">
+                        <span class="badge" id="modal-car-badge">SUV</span>
+                        <h4 id="modal-car-name">Creta</h4>
+                    </div>
+                    <div class="car-rate-info">
+                        Base Rate: <strong id="modal-car-rate">₹2500</strong> / day
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="book-customer">Customer Full Name</label>
+                    <input type="text" id="book-customer" placeholder="Enter customer name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="book-days">Rental Days</label>
+                    <input type="number" id="book-days" value="1" min="1" max="90" required>
+                </div>
+
+                <!-- Dynamic Live Rent Calculation Breakdown -->
+                <div class="bill-preview">
+                    <div class="bill-row">
+                        <span>Base Rental (<span id="calc-days">1</span> days &times; <span id="calc-rate">₹0</span>):</span>
+                        <span id="calc-base">₹0</span>
+                    </div>
+                    <div class="bill-row text-orange" id="suv-surcharge-row">
+                        <span>SUV Surcharge (Polymorphic):</span>
+                        <span>+₹300.00</span>
+                    </div>
+                    <div class="bill-divider"></div>
+                    <div class="bill-row total-row">
+                        <span>Total Rent (C++ virtual method):</span>
+                        <span class="text-cyan font-mono" id="calc-total">₹0.00</span>
+                    </div>
+                    <small class="text-muted" id="calc-formula-note">
+                        * SUV surcharge calculated using C++ runtime polymorphism: <code>SUV::calculateRent()</code>
+                    </small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="confirm-booking-btn">Confirm Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <footer class="footer">
+        <p>College Demo Project • Powered by <strong>C++17</strong> &amp; <strong>Crow Framework</strong> • Backend PID: Active</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
