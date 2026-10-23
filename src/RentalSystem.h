@@ -67,8 +67,8 @@ private:
     Car* findCarInternal(int id);
     const Car* findCarInternal(int id) const;
     void ensureDataDirectory();
-    void saveCars();
-    void saveRentals();
+    bool saveCars();
+    bool saveRentals();
     void loadCars();
     void loadRentals();
 

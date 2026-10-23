@@ -6,6 +6,9 @@
 #include <string>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 // Helper to serve local static files with appropriate content types
 void serveStaticFile(crow::response& res, const std::string& filePath, const std::string& contentType) {
@@ -140,7 +143,7 @@ int main(int argc, char* argv[]) {
                 response["carId"] = result.carId;
                 res.code = 201;
             } else {
-                res.code = 400;
+                res.code = (result.message.find("Disk write failure") != std::string::npos) ? 500 : 400;
             }
 
             res.set_header("Content-Type", "application/json");
@@ -204,7 +207,7 @@ int main(int argc, char* argv[]) {
             response["carType"] = result.carType;
             res.code = 200;
         } else {
-            res.code = 400;
+            res.code = (result.message.find("Disk write failure") != std::string::npos) ? 500 : 400;
         }
 
         res.set_header("Content-Type", "application/json");
@@ -249,7 +252,7 @@ int main(int argc, char* argv[]) {
             response["amount"] = result.amount;
             res.code = 200;
         } else {
-            res.code = 400;
+            res.code = (result.message.find("Disk write failure") != std::string::npos) ? 500 : 400;
         }
 
         res.set_header("Content-Type", "application/json");
@@ -301,12 +304,39 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Run non-invasive startup storage diagnostics
+    bool writePermissionOk = false;
+    try {
+        fs::path probePath = fs::path(system.getDataDir()) / ".storage_probe";
+        std::ofstream probe(probePath);
+        if (probe.is_open()) {
+            probe << "probe\n";
+            probe.close();
+            fs::remove(probePath);
+            writePermissionOk = true;
+        }
+    } catch (...) {
+        writePermissionOk = false;
+    }
+
+    fs::path carsPath = fs::path(system.getDataDir()) / "cars.txt";
+    fs::path rentalsPath = fs::path(system.getDataDir()) / "rentals.txt";
+    bool carsExists = fs::exists(carsPath);
+    bool rentalsExists = fs::exists(rentalsPath);
+    size_t carCount = system.getAllCars().size();
+    size_t rentalCount = system.getAllRentals().size();
+
     std::cout << "====================================================\n";
     std::cout << "  C++ OOP Car Rental Management System - Crow Server\n";
-    std::cout << "  Listening on: http://0.0.0.0:" << port << " (Port fallback: 18080)\n";
-    std::cout << "  Data directory: " << system.getDataDir() << "\n";
-    std::cout << "  Public directory: " << publicDir << "\n";
     std::cout << "====================================================\n";
+    std::cout << "  Listening on: http://0.0.0.0:" << port << " (Port fallback: 18080)\n";
+    std::cout << "  Data directory (resolved): " << system.getDataDir() << "\n";
+    std::cout << "  Data write test: " << (writePermissionOk ? "PASSED (Read/Write OK)" : "FAILED (Read-Only / Permission Denied)") << "\n";
+    std::cout << "  cars.txt: " << (carsExists ? "Found" : "Not Found (Will create on start)") << " (" << carCount << " cars loaded)\n";
+    std::cout << "  rentals.txt: " << (rentalsExists ? "Found" : "Not Found (Empty ledger)") << " (" << rentalCount << " records loaded)\n";
+    std::cout << "  Public directory: " << publicDir << " (" << (fs::exists(publicDir) ? "Found" : "Not Found") << ")\n";
+    std::cout << "  Storage notice: Local/Container disk. Persistent Disk at DATA_DIR required on Render to survive service restarts.\n";
+    std::cout << "====================================================\n" << std::endl;
 
     app.bindaddr("0.0.0.0").port(port).multithreaded().run();
     return 0;

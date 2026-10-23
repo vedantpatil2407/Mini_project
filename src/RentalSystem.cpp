@@ -2,15 +2,27 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <filesystem>
 #include <algorithm>
 
 namespace fs = std::filesystem;
 
-RentalSystem::RentalSystem(const std::string& dataDirectory)
-    : dataDir(dataDirectory) {
-    carsFilePath = dataDir + "/cars.txt";
-    rentalsFilePath = dataDir + "/rentals.txt";
+RentalSystem::RentalSystem(const std::string& dataDirectory) {
+    try {
+        fs::path p(dataDirectory);
+        if (!fs::exists(p)) {
+            fs::create_directories(p);
+        }
+        dataDir = fs::absolute(p).lexically_normal().string();
+    } catch (const std::exception& e) {
+        std::cerr << "[RentalSystem] Warning: Could not resolve absolute path for "
+                  << dataDirectory << ": " << e.what() << std::endl;
+        dataDir = dataDirectory;
+    }
+
+    carsFilePath = (fs::path(dataDir) / "cars.txt").string();
+    rentalsFilePath = (fs::path(dataDir) / "rentals.txt").string();
 
     ensureDataDirectory();
     loadCars();
@@ -19,11 +31,12 @@ RentalSystem::RentalSystem(const std::string& dataDirectory)
 
 void RentalSystem::ensureDataDirectory() {
     try {
-        if (!fs::exists(dataDir)) {
-            fs::create_directories(dataDir);
+        fs::path p(dataDir);
+        if (!fs::exists(p)) {
+            fs::create_directories(p);
         }
     } catch (const std::exception& e) {
-        std::cerr << "Warning: Failed to create data directory " << dataDir
+        std::cerr << "[RentalSystem] Warning: Failed to create data directory " << dataDir
                   << ": " << e.what() << std::endl;
     }
 }
@@ -49,11 +62,12 @@ const Car* RentalSystem::findCar(int id) {
     return findCarInternal(id);
 }
 
-void RentalSystem::saveCars() {
-    std::ofstream file(carsFilePath);
+bool RentalSystem::saveCars() {
+    ensureDataDirectory();
+    std::ofstream file(carsFilePath, std::ios::out | std::ios::trunc);
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open " << carsFilePath << " for writing!" << std::endl;
-        return;
+        std::cerr << "[RentalSystem] Error: Could not open " << carsFilePath << " for writing!" << std::endl;
+        return false;
     }
 
     for (const auto& car : cars) {
@@ -63,14 +77,23 @@ void RentalSystem::saveCars() {
              << car->getRate() << " "
              << (car->isAvailable() ? 1 : 0) << "\n";
     }
+
     file.flush();
+    if (file.fail() || file.bad()) {
+        std::cerr << "[RentalSystem] Error: Stream failure while writing to " << carsFilePath << std::endl;
+        file.close();
+        return false;
+    }
+    file.close();
+    return true;
 }
 
-void RentalSystem::saveRentals() {
-    std::ofstream file(rentalsFilePath);
+bool RentalSystem::saveRentals() {
+    ensureDataDirectory();
+    std::ofstream file(rentalsFilePath, std::ios::out | std::ios::trunc);
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open " << rentalsFilePath << " for writing!" << std::endl;
-        return;
+        std::cerr << "[RentalSystem] Error: Could not open " << rentalsFilePath << " for writing!" << std::endl;
+        return false;
     }
 
     for (const auto& r : rentals) {
@@ -81,29 +104,65 @@ void RentalSystem::saveRentals() {
              << r.amount << " "
              << (r.active ? 1 : 0) << "\n";
     }
+
     file.flush();
+    if (file.fail() || file.bad()) {
+        std::cerr << "[RentalSystem] Error: Stream failure while writing to " << rentalsFilePath << std::endl;
+        file.close();
+        return false;
+    }
+    file.close();
+    return true;
 }
 
 void RentalSystem::loadCars() {
     std::ifstream file(carsFilePath);
-    std::string type, name;
-    int id, available;
-    double rate;
-
     cars.clear();
 
     if (file.is_open()) {
-        while (file >> type >> id >> name >> rate >> available) {
-            bool isAvail = (available == 1);
-            if (type == "SUV") {
-                cars.push_back(std::make_unique<SUV>(id, name, rate, isAvail));
-            } else {
-                cars.push_back(std::make_unique<Sedan>(id, name, rate, isAvail));
+        std::string line;
+        while (std::getline(file, line)) {
+            if (line.empty() || line.find_first_not_of(" \t\r\n") == std::string::npos) {
+                continue;
+            }
+
+            std::istringstream iss(line);
+            std::vector<std::string> tokens;
+            std::string token;
+            while (iss >> token) {
+                tokens.push_back(token);
+            }
+
+            if (tokens.size() < 5) {
+                std::cerr << "[RentalSystem] Warning: Skipping malformed car record: " << line << std::endl;
+                continue;
+            }
+
+            try {
+                std::string type = tokens[0];
+                int id = std::stoi(tokens[1]);
+
+                std::string name = tokens[2];
+                for (size_t i = 3; i < tokens.size() - 2; ++i) {
+                    name += " " + tokens[i];
+                }
+
+                double rate = std::stod(tokens[tokens.size() - 2]);
+                int available = std::stoi(tokens[tokens.size() - 1]);
+                bool isAvail = (available == 1);
+
+                if (type == "SUV") {
+                    cars.push_back(std::make_unique<SUV>(id, name, rate, isAvail));
+                } else {
+                    cars.push_back(std::make_unique<Sedan>(id, name, rate, isAvail));
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "[RentalSystem] Error parsing car record: " << line << " (" << e.what() << ")" << std::endl;
             }
         }
     }
 
-    // Default sample cars for initial setup
+    // Default sample cars for initial setup if inventory is completely empty
     if (cars.empty()) {
         cars.push_back(std::make_unique<Sedan>(101, "Swift", 1200.0));
         cars.push_back(std::make_unique<Sedan>(102, "HondaCity", 1800.0));
@@ -115,19 +174,50 @@ void RentalSystem::loadCars() {
 
 void RentalSystem::loadRentals() {
     std::ifstream file(rentalsFilePath);
-    Rental r;
-    int activeInt;
-
     rentals.clear();
     nextRentalId = 1;
 
     if (file.is_open()) {
-        while (file >> r.rentalId >> r.carId >> r.customer >> r.days >> r.amount >> activeInt) {
-            r.active = (activeInt == 1);
-            rentals.push_back(r);
+        std::string line;
+        while (std::getline(file, line)) {
+            if (line.empty() || line.find_first_not_of(" \t\r\n") == std::string::npos) {
+                continue;
+            }
 
-            if (r.rentalId >= nextRentalId) {
-                nextRentalId = r.rentalId + 1;
+            std::istringstream iss(line);
+            std::vector<std::string> tokens;
+            std::string token;
+            while (iss >> token) {
+                tokens.push_back(token);
+            }
+
+            if (tokens.size() < 6) {
+                std::cerr << "[RentalSystem] Warning: Skipping malformed rental record: " << line << std::endl;
+                continue;
+            }
+
+            try {
+                int rentalId = std::stoi(tokens[0]);
+                int carId = std::stoi(tokens[1]);
+
+                std::string customer = tokens[2];
+                for (size_t i = 3; i < tokens.size() - 3; ++i) {
+                    customer += " " + tokens[i];
+                }
+
+                int days = std::stoi(tokens[tokens.size() - 3]);
+                double amount = std::stod(tokens[tokens.size() - 2]);
+                int activeInt = std::stoi(tokens[tokens.size() - 1]);
+                bool active = (activeInt == 1);
+
+                Rental r(rentalId, carId, customer, days, amount, active);
+                rentals.push_back(r);
+
+                if (rentalId >= nextRentalId) {
+                    nextRentalId = rentalId + 1;
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "[RentalSystem] Error parsing rental record: " << line << " (" << e.what() << ")" << std::endl;
             }
         }
     }
@@ -178,13 +268,31 @@ BookingResult RentalSystem::bookCar(int carId, const std::string& customer, int 
 
     // Runtime Polymorphism: SUV adds Rs. 300 surcharge automatically
     double amount = car->calculateRent(days);
+    int assignedRentalId = nextRentalId;
 
-    Rental r(nextRentalId++, carId, customer, days, amount, true);
+    // Tentatively update in-memory state
+    Rental r(assignedRentalId, carId, customer, days, amount, true);
     rentals.push_back(r);
+    nextRentalId++;
     car->setAvailable(false);
 
-    saveCars();
-    saveRentals();
+    bool carsSaved = saveCars();
+    bool rentalsSaved = saveRentals();
+
+    if (!carsSaved || !rentalsSaved) {
+        // Rollback state changes on persistence failure
+        rentals.pop_back();
+        nextRentalId = assignedRentalId;
+        car->setAvailable(true);
+
+        if (carsSaved) saveCars();
+        if (rentalsSaved) saveRentals();
+
+        std::cerr << "[RentalSystem] Error: Failed to persist booking to disk! Transaction rolled back." << std::endl;
+        res.success = false;
+        res.message = "Disk write failure: Unable to persist booking records to disk.";
+        return res;
+    }
 
     res.success = true;
     res.message = "Car successfully booked!";
@@ -207,6 +315,8 @@ ReturnResult RentalSystem::returnCar(int rentalId) {
     for (auto& r : rentals) {
         if (r.rentalId == rentalId && r.active) {
             Car* car = findCarInternal(r.carId);
+            bool prevAvail = (car != nullptr) ? car->isAvailable() : false;
+
             if (car != nullptr) {
                 car->setAvailable(true);
                 res.carName = car->getName();
@@ -215,8 +325,24 @@ ReturnResult RentalSystem::returnCar(int rentalId) {
             }
 
             r.active = false;
-            saveCars();
-            saveRentals();
+            bool carsSaved = saveCars();
+            bool rentalsSaved = saveRentals();
+
+            if (!carsSaved || !rentalsSaved) {
+                // Rollback state changes on persistence failure
+                if (car != nullptr) {
+                    car->setAvailable(prevAvail);
+                }
+                r.active = true;
+
+                if (carsSaved) saveCars();
+                if (rentalsSaved) saveRentals();
+
+                std::cerr << "[RentalSystem] Error: Failed to persist vehicle return to disk! Transaction rolled back." << std::endl;
+                res.success = false;
+                res.message = "Disk write failure: Unable to persist return records to disk.";
+                return res;
+            }
 
             res.success = true;
             res.message = "Vehicle returned successfully!";
@@ -265,7 +391,13 @@ AddCarResult RentalSystem::addCar(int id, const std::string& name, const std::st
         return res;
     }
 
-    saveCars();
+    if (!saveCars()) {
+        cars.pop_back();
+        std::cerr << "[RentalSystem] Error: Failed to persist new car to disk!" << std::endl;
+        res.success = false;
+        res.message = "Disk write failure: Unable to persist new vehicle to disk.";
+        return res;
+    }
 
     res.success = true;
     res.message = "Car successfully added to inventory!";
